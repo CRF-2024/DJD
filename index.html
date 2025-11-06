@@ -1,740 +1,221 @@
 <!doctype html>
 <html lang="en" class="h-full">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DJD Patient Care Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="/_sdk/data_sdk.js"></script>
   <style>
-        body {
-            box-sizing: border-box;
-        }
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .progress-bar {
-            transition: width 0.3s ease;
-        }
-        .nav-item {
-            transition: all 0.2s ease;
-        }
-        .nav-item:hover {
-            background-color: rgba(59, 130, 246, 0.1);
-        }
-        .nav-item.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-    </style>
-  <style>@view-transition { navigation: auto; }</style>
- </head>
- <body class="h-full bg-gradient-to-br from-blue-50 to-indigo-100 font-sans">
-  <div class="min-h-full flex"><!-- Sidebar Navigation -->
-   <nav class="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col">
-    <div class="p-6 border-b border-gray-200">
-     <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-       <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-       </svg>
+    body { box-sizing: border-box; }
+    .fade-in { animation: fadeIn 0.3s ease-in; }
+    @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+    .nav-item.active { background-color:#3b82f6; color:white; }
+  </style>
+</head>
+
+<body class="h-full bg-gradient-to-br from-blue-50 to-indigo-100 font-sans">
+
+  <div class="min-h-full flex">
+    <!-- Sidebar -->
+    <nav class="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col">
+      <div class="p-6 border-b border-gray-200 flex items-center space-x-3">
+        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">DJD</div>
+        <h1 class="text-lg font-bold text-gray-900">Patient Care Hub</h1>
       </div>
-      <h1 id="app-title" class="text-lg font-bold text-gray-900">DJD Patient Care Hub</h1>
-     </div>
+      <div class="flex-1 py-6 px-4 space-y-2">
+        <button class="nav-item active w-full text-left px-4 py-2 rounded-lg" onclick="showSection('dashboard', this)">Dashboard</button>
+        <button class="nav-item w-full text-left px-4 py-2 rounded-lg" onclick="showSection('tracker', this)">Symptom Tracker</button>
+        <button class="nav-item w-full text-left px-4 py-2 rounded-lg" onclick="showSection('medications', this)">Medications</button>
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col">
+      <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+        <h2 id="page-title" class="text-2xl font-bold text-gray-900">Dashboard</h2>
+      </header>
+
+      <main class="flex-1 p-6 overflow-y-auto">
+
+        <!-- Dashboard -->
+        <section id="dashboard-section" class="section">
+          <p class="text-gray-700 mb-6">Track your symptoms, medications, and progress.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Recent Pain Level</h3>
+              <p id="latest-pain" class="text-3xl font-bold text-red-500">-</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Active Medications</h3>
+              <p id="active-meds" class="text-3xl font-bold text-purple-600">0</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Symptom Tracker -->
+        <section id="tracker-section" class="section hidden">
+          <form id="symptom-form" class="space-y-6 bg-white p-6 rounded-xl shadow-md border border-gray-200">
+            <h3 class="text-xl font-semibold">Today's Entry</h3>
+            <label class="block">Pain Level (0–10)
+              <input type="range" id="pain-level" min="0" max="10" value="0" class="w-full">
+              <span id="pain-value">0</span>
+            </label>
+            <label class="block">Activity Level (0–10)
+              <input type="range" id="activity-level" min="0" max="10" value="5" class="w-full">
+              <span id="activity-value">5</span>
+            </label>
+            <label class="block">Medications Taken
+              <input type="text" id="medications" class="w-full border rounded p-2">
+            </label>
+            <label class="block">Notes
+              <textarea id="notes" class="w-full border rounded p-2"></textarea>
+            </label>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg">Save Entry</button>
+          </form>
+
+          <div class="bg-white rounded-xl shadow-md border border-gray-200 mt-6 p-6">
+            <h3 class="text-lg font-semibold mb-4">Recent Entries</h3>
+            <div id="entry-history" class="space-y-3 text-sm text-gray-700"></div>
+          </div>
+        </section>
+
+        <!-- Medications -->
+        <section id="medications-section" class="section hidden">
+          <form id="medication-form" class="space-y-4 bg-white p-6 rounded-xl shadow-md border border-gray-200">
+            <h3 class="text-xl font-semibold">Add Medication</h3>
+            <input id="medication-name" placeholder="Name" class="w-full border rounded p-2" required>
+            <input id="dosage" placeholder="Dosage" class="w-full border rounded p-2">
+            <input id="frequency" placeholder="Frequency" class="w-full border rounded p-2">
+            <button type="submit" class="w-full bg-purple-600 text-white py-2 rounded-lg">Add Medication</button>
+          </form>
+
+          <div class="bg-white rounded-xl shadow-md border border-gray-200 mt-6 p-6">
+            <h3 class="text-lg font-semibold mb-4">Current Medications</h3>
+            <div id="medications-list" class="space-y-3 text-sm text-gray-700"></div>
+          </div>
+        </section>
+
+      </main>
+
+      <footer class="bg-white border-t border-gray-200 text-center py-4 text-sm text-gray-600">
+        Educational use only. Consult your healthcare provider for advice.
+      </footer>
     </div>
-    <div class="flex-1 py-6">
-     <ul class="space-y-2 px-4">
-      <li><button onclick="showSection('dashboard')" class="nav-item active w-full text-left px-4 py-3 rounded-lg font-medium flex items-center space-x-3">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-        </svg><span>Dashboard</span> </button></li>
-      <li><button onclick="showSection('tracker')" class="nav-item w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 flex items-center space-x-3">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-        </svg><span>Symptom Tracker</span> </button></li>
-      <li><button onclick="showSection('medications')" class="nav-item w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 flex items-center space-x-3">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-        </svg><span>Medications</span> </button></li>
-      <li><button onclick="showSection('education')" class="nav-item w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 flex items-center space-x-3">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-        </svg><span>Education</span> </button></li>
-      <li><button onclick="showSection('exercises')" class="nav-item w-full text-left px-4 py-3 rounded-lg font-medium text-gray-600 flex items-center space-x-3">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-        </svg><span>Exercises</span> </button></li>
-     </ul>
-    </div>
-   </nav><!-- Main Content Area -->
-   <div class="flex-1 flex flex-col"><!-- Top Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-     <div class="px-6 py-4">
-      <h2 id="page-title" class="text-2xl font-bold text-gray-900">Dashboard</h2>
-     </div>
-    </header><!-- Main Content -->
-    <main class="flex-1 p-6 overflow-y-auto"><!-- Dashboard Section -->
-     <div id="dashboard-section" class="section">
-      <div class="mb-8">
-       <p id="welcome-message" class="text-lg text-gray-600 mb-6">Track your symptoms, learn about DJD management, and take control of your joint health journey.</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"><!-- Quick Stats -->
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <div class="flex items-center justify-between mb-4">
-         <h3 class="text-lg font-semibold text-gray-900">Recent Pain Level</h3>
-         <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center"><span class="text-red-600 text-sm font-bold" id="latest-pain">-</span>
-         </div>
-        </div>
-        <p class="text-sm text-gray-600">Last recorded entry</p>
-       </div>
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <div class="flex items-center justify-between mb-4">
-         <h3 class="text-lg font-semibold text-gray-900">Entries This Week</h3>
-         <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center"><span class="text-blue-600 text-sm font-bold" id="week-entries">0</span>
-         </div>
-        </div>
-        <p class="text-sm text-gray-600">Keep tracking daily</p>
-       </div>
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <div class="flex items-center justify-between mb-4">
-         <h3 class="text-lg font-semibold text-gray-900">Activity Level</h3>
-         <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center"><span class="text-green-600 text-sm font-bold" id="latest-activity">-</span>
-         </div>
-        </div>
-        <p class="text-sm text-gray-600">Stay active safely</p>
-       </div>
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <div class="flex items-center justify-between mb-4">
-         <h3 class="text-lg font-semibold text-gray-900">Active Medications</h3>
-         <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center"><span class="text-purple-600 text-sm font-bold" id="active-meds">0</span>
-         </div>
-        </div>
-        <p class="text-sm text-gray-600">Current prescriptions</p>
-       </div>
-      </div><!-- Quick Actions -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <h3 class="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h3>
-        <div class="space-y-3"><button onclick="showSection('tracker')" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"> Log Today's Symptoms </button> <button onclick="showSection('medications')" class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors font-medium"> Manage Medications </button> <button onclick="showSection('exercises')" class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"> View Exercise Plan </button>
-        </div>
-       </div>
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <h3 class="text-xl font-semibold text-gray-900 mb-4">Recent Entries</h3>
-        <div id="recent-entries" class="space-y-2">
-         <p class="text-gray-500 text-sm">No entries yet. Start tracking your symptoms!</p>
-        </div>
-       </div>
-      </div>
-     </div><!-- Symptom Tracker Section -->
-     <div id="tracker-section" class="section hidden">
-      <div class="mb-8">
-       <p class="text-lg text-gray-600">Track your daily symptoms to identify patterns and share with your healthcare provider.</p>
-      </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><!-- Tracking Form -->
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <h3 class="text-xl font-semibold text-gray-900 mb-6">Today's Entry</h3>
-        <form id="symptom-form" class="space-y-6">
-         <div><label for="pain-level" class="block text-sm font-medium text-gray-700 mb-2">Pain Level (0-10)</label> <input type="range" id="pain-level" name="pain-level" min="0" max="10" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-          <div class="flex justify-between text-xs text-gray-500 mt-1"><span>No Pain</span> <span id="pain-value" class="font-medium">0</span> <span>Severe</span>
-          </div>
-         </div>
-         <div><label for="stiffness-level" class="block text-sm font-medium text-gray-700 mb-2">Stiffness Level (0-10)</label> <input type="range" id="stiffness-level" name="stiffness-level" min="0" max="10" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-          <div class="flex justify-between text-xs text-gray-500 mt-1"><span>No Stiffness</span> <span id="stiffness-value" class="font-medium">0</span> <span>Very Stiff</span>
-          </div>
-         </div>
-         <div><label for="activity-level" class="block text-sm font-medium text-gray-700 mb-2">Activity Level (0-10)</label> <input type="range" id="activity-level" name="activity-level" min="0" max="10" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-          <div class="flex justify-between text-xs text-gray-500 mt-1"><span>Bed Rest</span> <span id="activity-value" class="font-medium">5</span> <span>Very Active</span>
-          </div>
-         </div>
-         <div><label for="medications" class="block text-sm font-medium text-gray-700 mb-2">Medications Taken</label> <input type="text" id="medications" name="medications" placeholder="e.g., Ibuprofen 400mg" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-         </div>
-         <div><label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label> <textarea id="notes" name="notes" rows="3" placeholder="Any additional observations..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-         </div><button type="submit" id="save-entry-btn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"> Save Entry </button>
-        </form>
-       </div><!-- Entry History -->
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <h3 class="text-xl font-semibold text-gray-900 mb-6">Recent Entries</h3>
-        <div id="entry-history" class="space-y-4 max-h-96 overflow-y-auto">
-         <p class="text-gray-500 text-sm">No entries yet. Start tracking your symptoms!</p>
-        </div>
-       </div>
-      </div>
-     </div><!-- Medications Section -->
-     <div id="medications-section" class="section hidden">
-      <div class="mb-8">
-       <p class="text-lg text-gray-600">Manage your medications, track dosages, and keep important prescription information organized.</p>
-      </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><!-- Add Medication Form -->
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <h3 class="text-xl font-semibold text-gray-900 mb-6">Add New Medication</h3>
-        <form id="medication-form" class="space-y-4">
-         <div><label for="medication-name" class="block text-sm font-medium text-gray-700 mb-2">Medication Name</label> <input type="text" id="medication-name" name="medication-name" placeholder="e.g., Ibuprofen" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-         </div>
-         <div class="grid grid-cols-2 gap-4">
-          <div><label for="dosage" class="block text-sm font-medium text-gray-700 mb-2">Dosage</label> <input type="text" id="dosage" name="dosage" placeholder="e.g., 400mg" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          </div>
-          <div><label for="frequency" class="block text-sm font-medium text-gray-700 mb-2">Frequency</label> <select id="frequency" name="frequency" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"> <option value="">Select frequency</option> <option value="Once daily">Once daily</option> <option value="Twice daily">Twice daily</option> <option value="Three times daily">Three times daily</option> <option value="Four times daily">Four times daily</option> <option value="As needed">As needed</option> <option value="Weekly">Weekly</option> <option value="Other">Other</option> </select>
-          </div>
-         </div>
-         <div><label for="medication-type" class="block text-sm font-medium text-gray-700 mb-2">Type</label> <select id="medication-type" name="medication-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"> <option value="">Select type</option> <option value="Pain Relief">Pain Relief</option> <option value="Anti-inflammatory">Anti-inflammatory</option> <option value="Muscle Relaxant">Muscle Relaxant</option> <option value="Supplement">Supplement</option> <option value="Prescription">Prescription</option> <option value="Over-the-counter">Over-the-counter</option> <option value="Other">Other</option> </select>
-         </div>
-         <div><label for="prescriber" class="block text-sm font-medium text-gray-700 mb-2">Prescriber/Doctor</label> <input type="text" id="prescriber" name="prescriber" placeholder="e.g., Dr. Smith" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-         </div>
-         <div><label for="start-date" class="block text-sm font-medium text-gray-700 mb-2">Start Date</label> <input type="date" id="start-date" name="start-date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-         </div>
-         <div><label for="medication-notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label> <textarea id="medication-notes" name="medication-notes" rows="3" placeholder="Special instructions, side effects, etc." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-         </div><button type="submit" id="save-medication-btn" class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors font-medium"> Add Medication </button>
-        </form>
-       </div><!-- Medications List -->
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <h3 class="text-xl font-semibold text-gray-900 mb-6">Current Medications</h3>
-        <div id="medications-list" class="space-y-4 max-h-96 overflow-y-auto">
-         <p class="text-gray-500 text-sm">No medications added yet. Add your first medication!</p>
-        </div>
-       </div>
-      </div>
-     </div><!-- Education Section -->
-     <div id="education-section" class="section hidden">
-      <div class="mb-8">
-       <p class="text-lg text-gray-600">Learn about degenerative joint disease and how to manage your condition effectively.</p>
-      </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-       <div class="space-y-6">
-        <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-         <h3 class="text-xl font-semibold text-gray-900 mb-4">What is DJD?</h3>
-         <p class="text-gray-600 mb-4">Degenerative Joint Disease (DJD), also known as osteoarthritis, is the most common form of arthritis. It occurs when the protective cartilage that cushions the ends of bones wears down over time.</p>
-         <ul class="list-disc list-inside text-gray-600 space-y-2 mb-4">
-          <li>Affects millions of people worldwide</li>
-          <li>Most commonly affects knees, hips, hands, and spine</li>
-          <li>Symptoms typically develop gradually</li>
-          <li>More common with age, but can affect younger people</li>
-         </ul>
-         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <h4 class="font-medium text-blue-900 mb-2">📚 Learn More</h4>
-          <div class="space-y-2"><a href="https://www.arthritis.org/diseases/osteoarthritis" target="_blank" rel="noopener noreferrer" class="block text-blue-600 hover:text-blue-800 text-sm underline"> Arthritis Foundation - Osteoarthritis Guide </a> <a href="https://www.mayoclinic.org/diseases-conditions/osteoarthritis/symptoms-causes/syc-20351925" target="_blank" rel="noopener noreferrer" class="block text-blue-600 hover:text-blue-800 text-sm underline"> Mayo Clinic - Osteoarthritis Overview </a>
-          </div>
-         </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-         <h3 class="text-xl font-semibold text-gray-900 mb-4">Common Symptoms</h3>
-         <div class="space-y-3 mb-4">
-          <div class="flex items-start space-x-3">
-           <div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
-           <div>
-            <h4 class="font-medium text-gray-900">Joint Pain</h4>
-            <p class="text-sm text-gray-600">Pain during or after movement, especially after periods of inactivity</p>
-           </div>
-          </div>
-          <div class="flex items-start space-x-3">
-           <div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
-           <div>
-            <h4 class="font-medium text-gray-900">Stiffness</h4>
-            <p class="text-sm text-gray-600">Joint stiffness, particularly in the morning or after sitting</p>
-           </div>
-          </div>
-          <div class="flex items-start space-x-3">
-           <div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
-           <div>
-            <h4 class="font-medium text-gray-900">Reduced Range of Motion</h4>
-            <p class="text-sm text-gray-600">Difficulty moving joints through their full range</p>
-           </div>
-          </div>
-         </div>
-         <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-          <h4 class="font-medium text-green-900 mb-2">🎥 Educational Videos</h4>
-          <div class="space-y-2"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" class="block text-green-600 hover:text-green-800 text-sm underline"> Understanding Joint Pain and Stiffness </a> <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" class="block text-green-600 hover:text-green-800 text-sm underline"> Managing DJD Symptoms Daily </a>
-          </div>
-         </div>
-        </div>
-       </div>
-       <div class="space-y-6">
-        <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-         <h3 class="text-xl font-semibold text-gray-900 mb-4">Management Strategies</h3>
-         <div class="space-y-4 mb-4">
-          <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-           <h4 class="font-medium text-green-900 mb-2">Stay Active</h4>
-           <p class="text-sm text-green-700">Regular low-impact exercise helps maintain joint flexibility and muscle strength</p>
-          </div>
-          <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-           <h4 class="font-medium text-blue-900 mb-2">Maintain Healthy Weight</h4>
-           <p class="text-sm text-blue-700">Reducing excess weight decreases stress on weight-bearing joints</p>
-          </div>
-          <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
-           <h4 class="font-medium text-purple-900 mb-2">Heat &amp; Cold Therapy</h4>
-           <p class="text-sm text-purple-700">Apply heat for stiffness and cold for acute pain and swelling</p>
-          </div>
-         </div>
-         <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
-          <h4 class="font-medium text-orange-900 mb-2">🔗 Helpful Resources</h4>
-          <div class="space-y-2"><a href="https://www.cdc.gov/arthritis/basics/osteoarthritis.htm" target="_blank" rel="noopener noreferrer" class="block text-orange-600 hover:text-orange-800 text-sm underline"> CDC - Osteoarthritis Management </a> <a href="https://www.niams.nih.gov/health-topics/osteoarthritis" target="_blank" rel="noopener noreferrer" class="block text-orange-600 hover:text-orange-800 text-sm underline"> NIH - Osteoarthritis Information </a>
-          </div>
-         </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-         <h3 class="text-xl font-semibold text-gray-900 mb-4">When to See Your Doctor</h3>
-         <ul class="space-y-2 text-gray-600 mb-4">
-          <li class="flex items-start space-x-2"><span class="text-red-500 mt-1">•</span> <span>Persistent joint pain that interferes with daily activities</span></li>
-          <li class="flex items-start space-x-2"><span class="text-red-500 mt-1">•</span> <span>Significant increase in pain or stiffness</span></li>
-          <li class="flex items-start space-x-2"><span class="text-red-500 mt-1">•</span> <span>Joint swelling or warmth</span></li>
-          <li class="flex items-start space-x-2"><span class="text-red-500 mt-1">•</span> <span>Difficulty performing routine tasks</span></li>
-         </ul>
-         <div class="bg-red-50 p-4 rounded-lg border border-red-200">
-          <h4 class="font-medium text-red-900 mb-2">🩺 Professional Support</h4>
-          <div class="space-y-2"><a href="https://www.rheumatology.org/I-Am-A/Patient-Caregiver/Diseases-Conditions/Osteoarthritis" target="_blank" rel="noopener noreferrer" class="block text-red-600 hover:text-red-800 text-sm underline"> Find a Rheumatologist </a> <a href="https://www.apta.org/find-a-pt" target="_blank" rel="noopener noreferrer" class="block text-red-600 hover:text-red-800 text-sm underline"> Find a Physical Therapist </a>
-          </div>
-         </div>
-        </div>
-       </div>
-      </div>
-     </div><!-- Exercises Section -->
-     <div id="exercises-section" class="section hidden">
-      <div class="mb-8">
-       <p class="text-lg text-gray-600">Safe, low-impact exercises to help maintain joint mobility and reduce stiffness.</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-         </svg>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-3">Range of Motion</h3>
-        <p class="text-gray-600 mb-4">Gentle movements to maintain joint flexibility</p>
-        <ul class="text-sm text-gray-600 space-y-1">
-         <li>• Shoulder rolls (10 forward, 10 backward)</li>
-         <li>• Ankle circles (10 each direction)</li>
-         <li>• Neck rotations (gentle, 5 each way)</li>
-         <li>• Wrist circles (10 each direction)</li>
-        </ul>
-       </div>
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-         </svg>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-3">Strengthening</h3>
-        <p class="text-gray-600 mb-4">Build muscle strength to support joints</p>
-        <ul class="text-sm text-gray-600 space-y-1">
-         <li>• Wall push-ups (10-15 reps)</li>
-         <li>• Chair squats (8-12 reps)</li>
-         <li>• Leg raises (10 each leg)</li>
-         <li>• Resistance band exercises</li>
-        </ul>
-       </div>
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-         <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-         </svg>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-3">Low-Impact Cardio</h3>
-        <p class="text-gray-600 mb-4">Improve cardiovascular health safely</p>
-        <ul class="text-sm text-gray-600 space-y-1">
-         <li>• Walking (start with 10-15 minutes)</li>
-         <li>• Swimming or water aerobics</li>
-         <li>• Stationary cycling</li>
-         <li>• Tai Chi or gentle yoga</li>
-        </ul>
-       </div>
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-         <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-         </svg>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-3">Morning Routine</h3>
-        <p class="text-gray-600 mb-4">Start your day with gentle movement</p>
-        <ul class="text-sm text-gray-600 space-y-1">
-         <li>• Gentle stretching in bed (5 minutes)</li>
-         <li>• Warm shower to loosen joints</li>
-         <li>• Light walking or movement</li>
-         <li>• Deep breathing exercises</li>
-        </ul>
-       </div>
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-         <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-         </svg>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-3">Evening Routine</h3>
-        <p class="text-gray-600 mb-4">Wind down and prepare for rest</p>
-        <ul class="text-sm text-gray-600 space-y-1">
-         <li>• Gentle stretching (10 minutes)</li>
-         <li>• Heat therapy for stiff joints</li>
-         <li>• Relaxation techniques</li>
-         <li>• Prepare joints for sleep</li>
-        </ul>
-       </div>
-       <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-         <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"></path>
-         </svg>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-3">Important Reminders</h3>
-        <p class="text-gray-600 mb-4">Safety guidelines for exercise</p>
-        <ul class="text-sm text-gray-600 space-y-1">
-         <li>• Start slowly and gradually increase</li>
-         <li>• Stop if you feel sharp pain</li>
-         <li>• Consult your doctor before starting</li>
-         <li>• Listen to your body's signals</li>
-        </ul>
-       </div>
-      </div>
-     </div>
-    </main><!-- Footer -->
-    <footer class="bg-white border-t border-gray-200">
-     <div class="px-6 py-4">
-      <div class="text-center">
-       <p id="footer-text" class="text-gray-600">This app is for educational purposes only. Always consult with your healthcare provider for personalized medical advice.</p>
-      </div>
-     </div>
-    </footer>
-   </div>
   </div>
+
   <script>
-        // Configuration and SDK setup
-        const defaultConfig = {
-            app_title: "DJD Patient Care Hub",
-            welcome_message: "Track your symptoms, learn about DJD management, and take control of your joint health journey.",
-            footer_text: "This app is for educational purposes only. Always consult with your healthcare provider for personalized medical advice."
-        };
+    let allEntries = JSON.parse(localStorage.getItem("entries") || "[]");
+    let allMedications = JSON.parse(localStorage.getItem("medications") || "[]");
 
-        let currentRecordCount = 0;
-        let allEntries = [];
-        let allMedications = [];
+    // Section navigation
+    function showSection(name, btn) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(name + "-section").classList.remove('hidden');
+      document.getElementById(name + "-section").classList.add('fade-in');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('page-title').textContent = btn.textContent;
+      updateDashboard();
+    }
 
-        // Data handler for symptom tracking and medications
-        const dataHandler = {
-            onDataChanged(data) {
-                // Separate entries and medications
-                allEntries = data.filter(item => item.date && item.pain_level !== undefined);
-                allMedications = data.filter(item => item.medication_name);
-                
-                currentRecordCount = data.length;
-                updateDashboardStats(allEntries, allMedications);
-                updateEntryHistory(allEntries);
-                updateRecentEntries(allEntries);
-                updateMedicationsList(allMedications);
-            }
-        };
+    // Save symptom entry
+    document.getElementById("symptom-form").addEventListener("submit", e => {
+      e.preventDefault();
+      const entry = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString(),
+        pain_level: document.getElementById("pain-level").value,
+        activity_level: document.getElementById("activity-level").value,
+        medications: document.getElementById("medications").value,
+        notes: document.getElementById("notes").value
+      };
+      allEntries.push(entry);
+      localStorage.setItem("entries", JSON.stringify(allEntries));
+      updateEntryHistory();
+      updateDashboard();
+      e.target.reset();
+      showToast("Entry saved!");
+    });
 
-        // Element SDK setup
-        const elementConfig = {
-            defaultConfig: defaultConfig,
-            onConfigChange: async (config) => {
-                const appTitle = config.app_title || defaultConfig.app_title;
-                const welcomeMessage = config.welcome_message || defaultConfig.welcome_message;
-                const footerText = config.footer_text || defaultConfig.footer_text;
+    // Save medication
+    document.getElementById("medication-form").addEventListener("submit", e => {
+      e.preventDefault();
+      const med = {
+        id: Date.now(),
+        medication_name: document.getElementById("medication-name").value,
+        dosage: document.getElementById("dosage").value,
+        frequency: document.getElementById("frequency").value
+      };
+      allMedications.push(med);
+      localStorage.setItem("medications", JSON.stringify(allMedications));
+      updateMedicationsList();
+      e.target.reset();
+      showToast("Medication saved!");
+    });
 
-                document.getElementById('app-title').textContent = appTitle;
-                document.getElementById('welcome-message').textContent = welcomeMessage;
-                document.getElementById('footer-text').textContent = footerText;
-            },
-            mapToCapabilities: (config) => ({
-                recolorables: [],
-                borderables: [],
-                fontEditable: undefined,
-                fontSizeable: undefined
-            }),
-            mapToEditPanelValues: (config) => new Map([
-                ["app_title", config.app_title || defaultConfig.app_title],
-                ["welcome_message", config.welcome_message || defaultConfig.welcome_message],
-                ["footer_text", config.footer_text || defaultConfig.footer_text]
-            ])
-        };
+    // Delete functions
+    function deleteEntry(id) {
+      allEntries = allEntries.filter(e => e.id !== id);
+      localStorage.setItem("entries", JSON.stringify(allEntries));
+      updateEntryHistory();
+      updateDashboard();
+      showToast("Entry deleted");
+    }
+    function deleteMedication(id) {
+      allMedications = allMedications.filter(m => m.id !== id);
+      localStorage.setItem("medications", JSON.stringify(allMedications));
+      updateMedicationsList();
+      updateDashboard();
+      showToast("Medication deleted");
+    }
 
-        // Initialize SDKs
-        async function initializeApp() {
-            if (window.elementSdk) {
-                window.elementSdk.init(elementConfig);
-            }
+    // Update display
+    function updateDashboard() {
+      const latest = allEntries[allEntries.length - 1];
+      document.getElementById("latest-pain").textContent = latest ? latest.pain_level : "-";
+      document.getElementById("active-meds").textContent = allMedications.length;
+    }
+    function updateEntryHistory() {
+      const c = document.getElementById("entry-history");
+      if (allEntries.length === 0) return c.innerHTML = "<p>No entries yet.</p>";
+      c.innerHTML = allEntries.slice(-10).reverse().map(e => `
+        <div class="border rounded p-3">
+          <div class="flex justify-between"><b>${e.date}</b>
+            <button class="text-red-500" onclick="deleteEntry(${e.id})">Delete</button>
+          </div>
+          <p>Pain: ${e.pain_level}/10, Activity: ${e.activity_level}/10</p>
+          ${e.medications ? `<p>Medications: ${e.medications}</p>` : ""}
+          ${e.notes ? `<p>Notes: ${e.notes}</p>` : ""}
+        </div>
+      `).join("");
+    }
+    function updateMedicationsList() {
+      const c = document.getElementById("medications-list");
+      if (allMedications.length === 0) return c.innerHTML = "<p>No medications added yet.</p>";
+      c.innerHTML = allMedications.slice(-10).reverse().map(m => `
+        <div class="border rounded p-3 flex justify-between">
+          <div><b>${m.medication_name}</b><br>${m.dosage || ""} ${m.frequency || ""}</div>
+          <button class="text-red-500" onclick="deleteMedication(${m.id})">Delete</button>
+        </div>
+      `).join("");
+    }
 
-            if (window.dataSdk) {
-                const initResult = await window.dataSdk.init(dataHandler);
-                if (!initResult.isOk) {
-                    console.error("Failed to initialize data SDK");
-                }
-            }
-        }
+    // Toast notification
+    function showToast(msg) {
+      const t = document.createElement("div");
+      t.textContent = msg;
+      t.className = "fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded shadow";
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2000);
+    }
 
-        // Navigation
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.add('hidden');
-            });
+    // Initialize
+    document.addEventListener("DOMContentLoaded", () => {
+      updateDashboard();
+      updateEntryHistory();
+      updateMedicationsList();
+    });
+  </script>
 
-            // Show selected section
-            document.getElementById(sectionName + '-section').classList.remove('hidden');
-            document.getElementById(sectionName + '-section').classList.add('fade-in');
-
-            // Update navigation
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Update page title
-            const titles = {
-                'dashboard': 'Dashboard',
-                'tracker': 'Symptom Tracker',
-                'medications': 'Medications',
-                'education': 'Education',
-                'exercises': 'Exercises'
-            };
-            document.getElementById('page-title').textContent = titles[sectionName] || 'Dashboard';
-        }
-
-        // Slider value updates
-        document.addEventListener('DOMContentLoaded', function() {
-            const painSlider = document.getElementById('pain-level');
-            const stiffnessSlider = document.getElementById('stiffness-level');
-            const activitySlider = document.getElementById('activity-level');
-
-            if (painSlider) {
-                painSlider.addEventListener('input', function() {
-                    document.getElementById('pain-value').textContent = this.value;
-                });
-            }
-
-            if (stiffnessSlider) {
-                stiffnessSlider.addEventListener('input', function() {
-                    document.getElementById('stiffness-value').textContent = this.value;
-                });
-            }
-
-            if (activitySlider) {
-                activitySlider.addEventListener('input', function() {
-                    document.getElementById('activity-value').textContent = this.value;
-                });
-            }
-
-            // Initialize app
-            initializeApp();
-        });
-
-        // Symptom form submission
-        document.getElementById('symptom-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (currentRecordCount >= 999) {
-                showToast("Maximum limit of 999 entries reached. Please delete some entries first.", "error");
-                return;
-            }
-
-            const saveBtn = document.getElementById('save-entry-btn');
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'Saving...';
-
-            const formData = new FormData(this);
-            const entry = {
-                id: Date.now().toString(),
-                date: new Date().toLocaleDateString(),
-                pain_level: parseInt(formData.get('pain-level')),
-                stiffness_level: parseInt(formData.get('stiffness-level')),
-                activity_level: parseInt(formData.get('activity-level')),
-                medications: formData.get('medications') || '',
-                notes: formData.get('notes') || '',
-                created_at: new Date().toISOString()
-            };
-
-            if (window.dataSdk) {
-                const result = await window.dataSdk.create(entry);
-                if (result.isOk) {
-                    showToast("Entry saved successfully!", "success");
-                    this.reset();
-                    // Reset slider displays
-                    document.getElementById('pain-value').textContent = '0';
-                    document.getElementById('stiffness-value').textContent = '0';
-                    document.getElementById('activity-value').textContent = '5';
-                } else {
-                    showToast("Failed to save entry. Please try again.", "error");
-                }
-            }
-
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Save Entry';
-        });
-
-        // Medication form submission
-        document.getElementById('medication-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (currentRecordCount >= 999) {
-                showToast("Maximum limit of 999 entries reached. Please delete some entries first.", "error");
-                return;
-            }
-
-            const saveBtn = document.getElementById('save-medication-btn');
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'Saving...';
-
-            const formData = new FormData(this);
-            const medication = {
-                medication_id: Date.now().toString(),
-                medication_name: formData.get('medication-name'),
-                dosage: formData.get('dosage') || '',
-                frequency: formData.get('frequency') || '',
-                medication_type: formData.get('medication-type') || '',
-                prescriber: formData.get('prescriber') || '',
-                start_date: formData.get('start-date') || '',
-                medication_notes: formData.get('medication-notes') || '',
-                created_at: new Date().toISOString()
-            };
-
-            if (window.dataSdk) {
-                const result = await window.dataSdk.create(medication);
-                if (result.isOk) {
-                    showToast("Medication added successfully!", "success");
-                    this.reset();
-                } else {
-                    showToast("Failed to add medication. Please try again.", "error");
-                }
-            }
-
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Add Medication';
-        });
-
-        // Update dashboard statistics
-        function updateDashboardStats(entries, medications) {
-            const latestEntry = entries.length > 0 ? entries[entries.length - 1] : null;
-            
-            document.getElementById('latest-pain').textContent = latestEntry ? latestEntry.pain_level : '-';
-            document.getElementById('latest-activity').textContent = latestEntry ? latestEntry.activity_level : '-';
-            document.getElementById('active-meds').textContent = medications.length;
-
-            // Calculate entries this week
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-            const weekEntries = entries.filter(entry => new Date(entry.created_at) >= oneWeekAgo).length;
-            document.getElementById('week-entries').textContent = weekEntries;
-        }
-
-        // Update entry history
-        function updateEntryHistory(data) {
-            const historyContainer = document.getElementById('entry-history');
-            
-            if (data.length === 0) {
-                historyContainer.innerHTML = '<p class="text-gray-500 text-sm">No entries yet. Start tracking your symptoms!</p>';
-                return;
-            }
-
-            const recentEntries = data.slice(-10).reverse();
-            historyContainer.innerHTML = recentEntries.map(entry => `
-                <div class="border border-gray-200 rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="font-medium text-gray-900">${entry.date}</span>
-                        <button onclick="deleteEntry('${entry.__backendId}')" class="text-red-500 hover:text-red-700 text-sm">Delete</button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-4 text-sm">
-                        <div>
-                            <span class="text-gray-600">Pain:</span>
-                            <span class="font-medium">${entry.pain_level}/10</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-600">Stiffness:</span>
-                            <span class="font-medium">${entry.stiffness_level}/10</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-600">Activity:</span>
-                            <span class="font-medium">${entry.activity_level}/10</span>
-                        </div>
-                    </div>
-                    ${entry.medications ? `<p class="text-sm text-gray-600 mt-2"><strong>Medications:</strong> ${entry.medications}</p>` : ''}
-                    ${entry.notes ? `<p class="text-sm text-gray-600 mt-2"><strong>Notes:</strong> ${entry.notes}</p>` : ''}
-                </div>
-            `).join('');
-        }
-
-        // Update recent entries on dashboard
-        function updateRecentEntries(data) {
-            const recentContainer = document.getElementById('recent-entries');
-            
-            if (data.length === 0) {
-                recentContainer.innerHTML = '<p class="text-gray-500 text-sm">No entries yet. Start tracking your symptoms!</p>';
-                return;
-            }
-
-            const recentEntries = data.slice(-3).reverse();
-            recentContainer.innerHTML = recentEntries.map(entry => `
-                <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                    <div>
-                        <span class="text-sm font-medium text-gray-900">${entry.date}</span>
-                        <span class="text-xs text-gray-500 ml-2">Pain: ${entry.pain_level}/10</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Update medications list
-        function updateMedicationsList(medications) {
-            const medicationsContainer = document.getElementById('medications-list');
-            
-            if (medications.length === 0) {
-                medicationsContainer.innerHTML = '<p class="text-gray-500 text-sm">No medications added yet. Add your first medication!</p>';
-                return;
-            }
-
-            medicationsContainer.innerHTML = medications.map(med => `
-                <div class="border border-gray-200 rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-medium text-gray-900">${med.medication_name}</h4>
-                        <button onclick="deleteMedication('${med.__backendId}')" class="text-red-500 hover:text-red-700 text-sm">Delete</button>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 text-sm mb-2">
-                        ${med.dosage ? `<div><span class="text-gray-600">Dosage:</span> <span class="font-medium">${med.dosage}</span></div>` : ''}
-                        ${med.frequency ? `<div><span class="text-gray-600">Frequency:</span> <span class="font-medium">${med.frequency}</span></div>` : ''}
-                        ${med.medication_type ? `<div><span class="text-gray-600">Type:</span> <span class="font-medium">${med.medication_type}</span></div>` : ''}
-                        ${med.prescriber ? `<div><span class="text-gray-600">Prescriber:</span> <span class="font-medium">${med.prescriber}</span></div>` : ''}
-                    </div>
-                    ${med.start_date ? `<p class="text-sm text-gray-600"><strong>Started:</strong> ${new Date(med.start_date).toLocaleDateString()}</p>` : ''}
-                    ${med.medication_notes ? `<p class="text-sm text-gray-600 mt-2"><strong>Notes:</strong> ${med.medication_notes}</p>` : ''}
-                </div>
-            `).join('');
-        }
-
-        // Delete entry
-        async function deleteEntry(backendId) {
-            const entry = allEntries.find(e => e.__backendId === backendId);
-            if (!entry) return;
-
-            if (window.dataSdk) {
-                const result = await window.dataSdk.delete(entry);
-                if (result.isOk) {
-                    showToast("Entry deleted successfully!", "success");
-                } else {
-                    showToast("Failed to delete entry. Please try again.", "error");
-                }
-            }
-        }
-
-        // Delete medication
-        async function deleteMedication(backendId) {
-            const medication = allMedications.find(m => m.__backendId === backendId);
-            if (!medication) return;
-
-            if (window.dataSdk) {
-                const result = await window.dataSdk.delete(medication);
-                if (result.isOk) {
-                    showToast("Medication deleted successfully!", "success");
-                } else {
-                    showToast("Failed to delete medication. Please try again.", "error");
-                }
-            }
-        }
-
-        // Toast notification system
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-medium z-50 ${
-                type === 'success' ? 'bg-green-500' : 
-                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-            }`;
-            toast.textContent = message;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-    </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a07ddf90b561c1',t:'MTc2MjM4OTEyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
